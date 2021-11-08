@@ -1,7 +1,7 @@
 import torch.nn as nn
 
 from models.resnet import ResNet18, ResNet34, ResNet50
-from models.resnet_imagenet import resnet18, resnet50
+from models.resnet_imagenet import resnet18, resnet50, resnet101
 import models.transform_layers as TL
 
 
@@ -69,6 +69,8 @@ def get_classifier(mode, n_classes=10):
         classifier = resnet18(num_classes=n_classes)
     elif mode == 'resnet50_imagenet':
         classifier = resnet50(num_classes=n_classes)
+    elif mode == 'resnet101_imagenet':
+        classifier = resnet101(num_classes=n_classes)
     else:
         raise NotImplementedError()
 

@@ -8,11 +8,18 @@ from torchvision import datasets, transforms
 from utils.utils import set_random_seed
 
 DATA_PATH = '~/data/'
-IMAGENET_PATH = '~/data/ImageNet'
+
+if os.path.isdir("/scratch/ImageNet"):
+    IMAGENET_PATH = os.path.expanduser('/scratch/ImageNet/')
+else:
+    IMAGENET_PATH = os.path.expanduser('~/data/ImageNet/')
+
+print(f"Loading data from: {IMAGENET_PATH}")
+
 
 
 CIFAR10_SUPERCLASS = list(range(10))  # one class
-IMAGENET_SUPERCLASS = list(range(30))  # one class
+IMAGENET_SUPERCLASS = list(range(1000))  # one class
 
 CIFAR100_SUPERCLASS = [
     [4, 31, 55, 72, 95],
@@ -171,9 +178,9 @@ def get_dataset(P, dataset, test_only=False, image_size=None, download=False, ev
 
     elif dataset == 'imagenet':
         image_size = (224, 224, 3)
-        n_classes = 30
-        train_dir = os.path.join(IMAGENET_PATH, 'one_class_train')
-        test_dir = os.path.join(IMAGENET_PATH, 'one_class_test')
+        n_classes = 1000
+        train_dir = os.path.join(IMAGENET_PATH, 'Data/CLS-LOC/train')
+        test_dir = os.path.join(IMAGENET_PATH, 'Data/CLS-LOC/train')
         train_set = datasets.ImageFolder(train_dir, transform=train_transform)
         test_set = datasets.ImageFolder(test_dir, transform=test_transform)
 

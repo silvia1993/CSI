@@ -46,12 +46,12 @@ for epoch in range(start_epoch, P.epochs + 1):
         save_checkpoint(epoch, save_states, optimizer.state_dict(), logger.logdir)
         save_linear_checkpoint(linear_optim.state_dict(), logger.logdir)
 
-    if epoch % P.error_step == 0 and ('sup' in P.mode):
-        error = test_classifier(P, model, test_loader, epoch, logger=logger)
+    #if epoch % P.error_step == 0 and ('sup' in P.mode):
+    #    error = test_classifier(P, model, test_loader, epoch, logger=logger)
 
-        is_best = (best > error)
-        if is_best:
-            best = error
+    #    is_best = (best > error)
+    #    if is_best:
+    #        best = error
 
-        logger.scalar_summary('eval/best_error', best, epoch)
-        logger.log('[Epoch %3d] [Test %5.2f] [Best %5.2f]' % (epoch, error, best))
+    #    logger.scalar_summary('eval/best_error', best, epoch)
+    #    logger.log('[Epoch %3d] [Test %5.2f] [Best %5.2f]' % (epoch, error, best))
