@@ -25,16 +25,18 @@ if P.n_gpus > 1:
     import apex
     import torch.distributed as dist
     from torch.utils.data.distributed import DistributedSampler
+    import os
 
     P.multi_gpu = True
     torch.distributed.init_process_group(
         'nccl',
-        init_method='env://',
-        world_size=P.n_gpus,
-        rank=P.local_rank,
+        init_method='env://'
     )
+    P.local_rank = int(os.environ['RANK'])
+    P.n_gpus = torch.distributed.get_world_size()
 else:
     P.multi_gpu = False
+
 
 ### only use one ood_layer while training
 P.ood_layer = P.ood_layer[0]
