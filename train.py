@@ -22,6 +22,8 @@ else:
 linear_optim = torch.optim.Adam(linear.parameters(), lr=1e-3, betas=(.9, .999), weight_decay=P.weight_decay)
 
 # Run experiments
+logger.log('Length dataset :'+str(len(train_loader.dataset)))
+logger.log('It for epoch :'+str(len(train_loader)))
 for epoch in range(start_epoch, P.epochs + 1):
     logger.log_dirname(f"Epoch {epoch}")
     model.train()
