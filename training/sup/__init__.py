@@ -8,7 +8,7 @@ def setup(mode, P):
     elif mode == 'sup_simclr':
         from .sup_simclr import train
     elif mode == 'sup_simclr_CSI':
-        assert P.batch_size == 32
+        #assert P.batch_size == 32
         # currently only support rotation
         from .sup_simclr_CSI import train
     else:
