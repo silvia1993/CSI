@@ -13,7 +13,7 @@ P = parse_args()
 ### Set torch device ###
 
 P.n_gpus = torch.cuda.device_count()
-assert P.n_gpus <= 1  # no multi GPU
+#assert P.n_gpus <= 1  # no multi GPU
 P.multi_gpu = False
 
 if torch.cuda.is_available():
@@ -51,8 +51,11 @@ if P.ood_dataset is None:
         P.ood_dataset = ['svhn', 'lsun_resize', 'imagenet_resize', 'lsun_fix', 'imagenet_fix', 'cifar100', 'interp']
     elif P.dataset == 'imagenet':
         P.ood_dataset = ['cub', 'stanford_dogs', 'flowers102', 'places365', 'food_101', 'caltech_256', 'dtd', 'pets']
+    elif P.dataset == 'OfficeHome_DG' or P.dataset == 'PACS_DG'  or P.dataset == 'MultiDatasets_DG' or P.dataset == 'DTD' or P.dataset =='PACS_SS_DG' or  P.dataset=='OfficeHome_SS_DG' or P.dataset == 'DomainNet_IN_OUT' or P.dataset == 'DomainNet_Painting' or P.dataset == 'DomainNet_Sketch' :
+        P.ood_dataset = [P.target]
 
-ood_test_loader = dict()
+ood_test_loader_in = dict()
+ood_test_loader_out = dict()
 for ood in P.ood_dataset:
     if ood == 'interp':
         ood_test_loader[ood] = None  # dummy loader
@@ -64,7 +67,8 @@ for ood in P.ood_dataset:
     else:
         ood_test_set = get_dataset(P, dataset=ood, test_only=True, image_size=P.image_size, eval=ood_eval)
 
-    ood_test_loader[ood] = DataLoader(ood_test_set, shuffle=False, batch_size=P.test_batch_size, **kwargs)
+    ood_test_loader_in[ood] = DataLoader(ood_test_set[0], shuffle=False, batch_size=P.test_batch_size, **kwargs)
+    ood_test_loader_out[ood] = DataLoader(ood_test_set[1], shuffle=False, batch_size=P.test_batch_size, **kwargs)
 
 ### Initialize model ###
 
@@ -78,4 +82,10 @@ criterion = nn.CrossEntropyLoss().to(device)
 
 if P.load_path is not None:
     checkpoint = torch.load(P.load_path)
+    checkpoint.pop('linear.weight')
+    checkpoint.pop('linear.bias')
+    checkpoint.pop('joint_distribution_layer.weight')
+    checkpoint.pop('joint_distribution_layer.bias')
+    checkpoint.pop('shift_cls_layer.weight')
+    checkpoint.pop('shift_cls_layer.bias')
     model.load_state_dict(checkpoint, strict=not P.no_strict)

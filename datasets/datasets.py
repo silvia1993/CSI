@@ -7,14 +7,17 @@ from torchvision import datasets, transforms
 
 from utils.utils import set_random_seed
 
-DATA_PATH = '~/data/'
+from PIL import Image
+import torch.utils.data as data
+
+DATA_PATH = '/home/silvia/data/'
 
 if os.path.isdir("/scratch/ImageNet"):
     IMAGENET_PATH = os.path.expanduser('/scratch/ImageNet/')
 else:
     IMAGENET_PATH = os.path.expanduser('~/data/ImageNet/')
 
-print(f"Loading data from: {IMAGENET_PATH}")
+    print(f"Loading data from: {IMAGENET_PATH}")
 
 
 
@@ -43,6 +46,44 @@ CIFAR100_SUPERCLASS = [
     [8, 13, 48, 58, 90],
     [41, 69, 81, 85, 89],
 ]
+
+class Dataset(data.Dataset):
+    def __init__(self, names,labels, path_dataset,img_transformer=None,dataset=None):
+        self.data_path = path_dataset
+        self.names = names
+        self.labels = labels
+        self._image_transformer = img_transformer
+        self.dataset = dataset
+
+
+    def __getitem__(self, index):
+
+        if 'DomainNet' in self.dataset or 'DN_IO' in self.dataset or 'DN_P' in self.dataset or 'DN_S' in self.dataset:
+            framename = self.data_path + '/DomainNet/' + self.names[index]
+        else:
+            framename = self.data_path + '/' + self.names[index]
+        img = Image.open(framename).convert('RGB')
+
+        img = self._image_transformer(img)
+
+        return img,int(self.labels[index])
+
+    def __len__(self):
+        return len(self.names)
+
+def dataset_info(txt_labels):
+    with open(txt_labels, 'r') as f:
+        images_list = f.readlines()
+
+    file_names = []
+    labels = []
+
+    for row in images_list:
+        row = row.split(' ')
+        file_names.append(row[0])
+        labels.append(int(row[1]))
+
+    return file_names, labels
 
 
 class MultiDataTransform(object):
@@ -138,7 +179,7 @@ def get_dataset(P, dataset, test_only=False, image_size=None, download=False, ev
         else:
             train_transform, test_transform = get_transform_imagenet()
     else:
-        train_transform, test_transform = get_transform(image_size=image_size)
+        train_transform, test_transform = get_transform(image_size=(224,224))
 
     if dataset == 'cifar10':
         image_size = (32, 32, 3)
@@ -183,6 +224,224 @@ def get_dataset(P, dataset, test_only=False, image_size=None, download=False, ev
         test_dir = os.path.join(IMAGENET_PATH, 'Data/CLS-LOC/train')
         train_set = datasets.ImageFolder(train_dir, transform=train_transform)
         test_set = datasets.ImageFolder(test_dir, transform=test_transform)
+
+    elif dataset == 'OfficeHome_DG':
+        image_size = (224, 224, 3)
+        n_classes = 54
+
+        target = P.target
+
+        path_source = 'data_txt/'+dataset+'/no_'+target+'.txt'
+
+        names, labels = dataset_info(path_source)
+        train_set = Dataset(names,labels, DATA_PATH,img_transformer=train_transform,dataset=dataset)
+
+        names, labels = dataset_info(path_source)
+        test_set = Dataset(names,labels, DATA_PATH,img_transformer=test_transform,dataset=dataset)
+
+
+    elif dataset=='PACS_DG':
+        image_size = (224, 224, 3)
+        n_classes = 6
+
+        target = P.target
+
+        path_source = 'data_txt/'+dataset+'/no_'+target+'.txt'
+
+        names, labels = dataset_info(path_source)
+        train_set = Dataset(names,labels, DATA_PATH,img_transformer=train_transform,dataset=dataset)
+
+        names, labels = dataset_info(path_source)
+        test_set = Dataset(names,labels, DATA_PATH,img_transformer=test_transform,dataset=dataset)
+
+    elif dataset=='MultiDatasets_DG':
+        image_size = (224, 224, 3)
+        n_classes = 48
+
+        target = P.target
+
+        path_source = 'data_txt/'+dataset+'/Sources.txt'
+
+        names, labels = dataset_info(path_source)
+        train_set = Dataset(names,labels, DATA_PATH,img_transformer=train_transform,dataset=dataset)
+
+        names, labels = dataset_info(path_source)
+        test_set = Dataset(names,labels, DATA_PATH,img_transformer=test_transform,dataset=dataset)
+
+    elif dataset=='DTD' :
+        image_size = (224, 224, 3)
+        n_classes = 23
+
+        target = P.target
+
+        path_source = 'data_txt/'+dataset+'/source.txt'
+
+        names, labels = dataset_info(path_source)
+        train_set = Dataset(names,labels, DATA_PATH,img_transformer=train_transform,dataset=dataset)
+
+        names, labels = dataset_info(path_source)
+        test_set = Dataset(names,labels, DATA_PATH,img_transformer=test_transform,dataset=dataset)
+
+
+    elif  dataset=='DomainNet_IN_OUT' or dataset=='DomainNet_Painting' or dataset =='DomainNet_Sketch':
+        image_size = (224, 224, 3)
+        n_classes = 25
+
+        target = P.target
+
+        path_source = 'data_txt/'+dataset+'/source.txt'
+
+        names, labels = dataset_info(path_source)
+        train_set = Dataset(names,labels, DATA_PATH,img_transformer=train_transform,dataset=dataset)
+
+        names, labels = dataset_info(path_source)
+        test_set = Dataset(names,labels, DATA_PATH,img_transformer=test_transform,dataset=dataset)
+
+
+    elif  dataset=='OfficeHome_SS_DG':
+        image_size = (224, 224, 3)
+        n_classes = 25
+
+        target = P.target
+
+        path_source = 'data_txt/'+dataset+'/source.txt'
+
+        names, labels = dataset_info(path_source)
+        train_set = Dataset(names,labels, DATA_PATH,img_transformer=train_transform,dataset=dataset)
+
+        names, labels = dataset_info(path_source)
+        test_set = Dataset(names,labels, DATA_PATH,img_transformer=test_transform,dataset=dataset)
+
+    elif dataset=='PACS_SS_DG':
+        image_size = (224, 224, 3)
+        n_classes = 6
+
+        target = P.target
+
+        path_source = 'data_txt/'+dataset+'/source.txt'
+
+        names, labels = dataset_info(path_source)
+        train_set = Dataset(names,labels, DATA_PATH,img_transformer=train_transform,dataset=dataset)
+
+        names, labels = dataset_info(path_source)
+        test_set = Dataset(names,labels, DATA_PATH,img_transformer=test_transform,dataset=dataset)
+
+    elif dataset == 'Clipart_MD' or dataset == 'Real_MD' or dataset == 'Painting_MD' or dataset == 'Sketch_MD':
+
+        image_size = (224, 224, 3)
+        n_classes = 6
+
+        target = P.target
+
+        path_target_in = 'data_txt/MultiDatasets_DG/'+target+'_in.txt'
+        path_target_out = 'data_txt/MultiDatasets_DG/' + target + '_out.txt'
+
+        names_in, labels_in = dataset_info(path_target_in)
+        names_out, labels_out = dataset_info(path_target_out)
+        test_set_in = Dataset(names_in,labels_in, DATA_PATH,img_transformer=test_transform,dataset=dataset)
+        test_set_out = Dataset(names_out, labels_out, DATA_PATH, img_transformer=test_transform,dataset=dataset)
+
+        test_set = [test_set_in,test_set_out]
+
+    elif dataset == 'Art' or dataset == 'Clipart' or dataset == 'Product' or dataset == 'RealWorld':
+
+        image_size = (224, 224, 3)
+        n_classes = 54
+
+        target = P.target
+
+        path_target_in = 'data_txt/OfficeHome_DG/'+target+'_in.txt'
+        path_target_out = 'data_txt/OfficeHome_DG/' + target + '_out.txt'
+
+        names_in, labels_in = dataset_info(path_target_in)
+        names_out, labels_out = dataset_info(path_target_out)
+        test_set_in = Dataset(names_in,labels_in, DATA_PATH,img_transformer=test_transform,dataset=dataset)
+        test_set_out = Dataset(names_out, labels_out, DATA_PATH, img_transformer=test_transform,dataset=dataset)
+
+        test_set = [test_set_in, test_set_out]
+
+
+    elif dataset == 'ArtPainting' or dataset == 'Cartoon' or dataset == 'Sketch' or dataset == 'Photo':
+        image_size = (224, 224, 3)
+        n_classes = 6
+
+        target = P.target
+
+        path_target_in = 'data_txt/PACS_DG/'+target+'_in.txt'
+        path_target_out = 'data_txt/PACS_DG/' + target + '_out.txt'
+
+        names_in, labels_in = dataset_info(path_target_in)
+        names_out, labels_out = dataset_info(path_target_out)
+        test_set_in = Dataset(names_in,labels_in, DATA_PATH,img_transformer=test_transform,dataset=dataset)
+        test_set_out = Dataset(names_out, labels_out, DATA_PATH, img_transformer=test_transform,dataset=dataset)
+
+        test_set = [test_set_in, test_set_out]
+
+    elif dataset == 'out':
+        image_size = (224, 224, 3)
+        n_classes = 23
+
+        target = P.target
+
+        path_target_in = 'data_txt/DTD/target_in.txt'
+        path_target_out = 'data_txt/DTD/target_out.txt'
+
+        names_in, labels_in = dataset_info(path_target_in)
+        names_out, labels_out = dataset_info(path_target_out)
+        test_set_in = Dataset(names_in,labels_in, DATA_PATH,img_transformer=test_transform,dataset=dataset)
+        test_set_out = Dataset(names_out, labels_out, DATA_PATH, img_transformer=test_transform,dataset=dataset)
+
+        test_set = [test_set_in, test_set_out]
+
+
+    elif dataset == 'DN_IO':
+        image_size = (224, 224, 3)
+        n_classes = 25
+
+        target = P.target
+
+        path_target_in = 'data_txt/DomainNet_IN_OUT/DN_IO_target_in.txt'
+        path_target_out = 'data_txt/DomainNet_IN_OUT/DN_IO_target_out.txt'
+
+        names_in, labels_in = dataset_info(path_target_in)
+        names_out, labels_out = dataset_info(path_target_out)
+        test_set_in = Dataset(names_in,labels_in, DATA_PATH,img_transformer=test_transform,dataset=dataset)
+        test_set_out = Dataset(names_out, labels_out, DATA_PATH, img_transformer=test_transform,dataset=dataset)
+
+        test_set = [test_set_in, test_set_out]
+
+    elif dataset == 'DN_P':
+        image_size = (224, 224, 3)
+        n_classes = 25
+
+        target = P.target
+
+        path_target_in = 'data_txt/DomainNet_Painting/DN_P_target_in.txt'
+        path_target_out = 'data_txt/DomainNet_Painting/DN_P_target_out.txt'
+
+        names_in, labels_in = dataset_info(path_target_in)
+        names_out, labels_out = dataset_info(path_target_out)
+        test_set_in = Dataset(names_in,labels_in, DATA_PATH,img_transformer=test_transform,dataset=dataset)
+        test_set_out = Dataset(names_out, labels_out, DATA_PATH, img_transformer=test_transform,dataset=dataset)
+
+        test_set = [test_set_in, test_set_out]
+
+
+    elif dataset == 'DN_S':
+        image_size = (224, 224, 3)
+        n_classes = 25
+
+        target = P.target
+
+        path_target_in = 'data_txt/DomainNet_Sketch/DN_S_target_in.txt'
+        path_target_out = 'data_txt/DomainNet_Sketch/DN_S_target_out.txt'
+
+        names_in, labels_in = dataset_info(path_target_in)
+        names_out, labels_out = dataset_info(path_target_out)
+        test_set_in = Dataset(names_in,labels_in, DATA_PATH,img_transformer=test_transform,dataset=dataset)
+        test_set_out = Dataset(names_out, labels_out, DATA_PATH, img_transformer=test_transform,dataset=dataset)
+
+        test_set = [test_set_in, test_set_out]
 
     elif dataset == 'stanford_dogs':
         assert test_only and image_size is not None

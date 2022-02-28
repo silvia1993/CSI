@@ -6,8 +6,8 @@ def parse_args(default=False):
 
     parser = ArgumentParser(description='Pytorch implementation of CSI')
 
-    parser.add_argument('--dataset', help='Dataset',
-                        choices=['cifar10', 'cifar100', 'imagenet'], type=str)
+    parser.add_argument('--dataset', help='Dataset', type=str)
+    parser.add_argument('--target')
     parser.add_argument('--one_class_idx', help='None: multi-class, Not None: one-class',
                         default=None, type=int)
     parser.add_argument('--model', help='Model',
@@ -51,9 +51,9 @@ def parse_args(default=False):
     parser.add_argument('--weight_decay', help='Weight decay',
                         default=1e-6, type=float)
     parser.add_argument('--batch_size', help='Batch size',
-                        default=128, type=int)
+                        default=1, type=int)
     parser.add_argument('--test_batch_size', help='Batch size for test loader',
-                        default=100, type=int)
+                        default=1, type=int)
 
     ##### Objective Configurations #####
     parser.add_argument('--sim_lambda', help='Weight for SimCLR loss',
@@ -81,6 +81,9 @@ def parse_args(default=False):
     parser.add_argument("--print_score", help='print quantiles of ood score',
                         action='store_true')
     parser.add_argument("--save_score", help='save ood score for plotting histogram',
+                        action='store_true')
+
+    parser.add_argument("--five_shot_eval", help='save ood score for plotting histogram',
                         action='store_true')
 
     if default:

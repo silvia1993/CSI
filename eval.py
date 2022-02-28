@@ -19,7 +19,7 @@ elif P.mode in ['ood', 'ood_pre']:
         from evals.ood_pre import eval_ood_detection
 
     with torch.no_grad():
-        auroc_dict = eval_ood_detection(P, model, test_loader, ood_test_loader, P.ood_score,
+        auroc_dict,fpr,auroc_dict_eucl,fpr_eucl= eval_ood_detection(P, model, test_loader, ood_test_loader_in,ood_test_loader_out, P.ood_score,
                                         train_loader=train_loader, simclr_aug=simclr_aug)
 
     if P.one_class_idx is not None:
@@ -45,7 +45,11 @@ elif P.mode in ['ood', 'ood_pre']:
         bests.append(best_auroc)
 
     bests = map('{:.4f}'.format, bests)
-    print('\t'.join(bests))
+    for ood in auroc_dict.keys():
+        print('ALL: CosSim: ', auroc_dict[ood]['simclr'])
+        print('ALL: FPR - CosSim ', fpr)
+        print('ALL: Eucl: ', auroc_dict_eucl[ood]['simclr'])
+        print('ALL: FPR - Eucl ', fpr_eucl)
 
 else:
     raise NotImplementedError()
